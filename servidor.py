@@ -3,21 +3,30 @@ import socket
 # Realizando o handshake
 def process_handshake(client_socket):
 
-    # Recebe o handshake inicial do cliente
-    handshake_data = client_socket.recv(1024).decode('utf-8')
-    print("Recebido handshake:", handshake_data)
+    # Recebe o handshake inicial do cliente (SYN)
+    resposta_syn = client_socket.recv(1024).decode('utf-8')
+    print("Recebido handshake:", resposta_syn)
 
     # Confere o handshake e separa o modo de operação e o tamanho máximo
-    parts = handshake_data.split('|')
-    if parts[0] == "HANDSHAKE" and len(parts) == 3:
-        mode = parts[1]  # Tipo de operação
-        max_size = int(parts[2])  # Tamanho máximo do pacote
+    parts = resposta_syn.split('|')
+    if parts[0] == "SYN" and len(parts) == 3:
+        modo = parts[1]  # Tipo de operação
+        tam_max = int(parts[2])  # Tamanho máximo do pacote
 
-        # Envia a resposta de OK para o cliente
-        response = f"OK|Modo de operação: {mode}|Tamanho máximo: {max_size}"
-        client_socket.send(response.encode('utf-8'))
+        # Envia a resposta para o cliente (SYN-ACK)
+        mensagem_syn_ack = f"SYN-ACK|{modo}|{tam_max}"
+        client_socket.send(mensagem_syn_ack.encode('utf-8'))
 
-        return mode, max_size
+
+        # Recebendo confirmação (ACK)
+        resposta_ack = client_socket.recv(1024).decode('utf-8')
+
+        if resposta_ack == "ACK":
+            print("Conexão feito estabelecida - handshake de 3 vias!")
+            return modo, tam_max
+        else:
+            print("Erro: ACK não recebido corretamente.")
+            return None, None
     else:
         client_socket.send("Erro no handshake".encode('utf-8'))
         return None, None
@@ -43,20 +52,20 @@ def comunicacao_cliente(client_socket):
         parts = data.split('|')
         if parts[0] == "MSG":
             # Mensagem recebida com sucesso, envia a resposta
-            response = "RESPONSE|Mensagem recebida com sucesso!"
-            client_socket.send(response.encode('utf-8'))
+            resposta = "RESPONSE|Mensagem recebida com sucesso!"
+            client_socket.send(resposta.encode('utf-8'))
         elif parts[0] == "NACK":
-            response = "NACK|Erro no pacote"
-            client_socket.send(response.encode('utf-8'))
+            resposta = "NACK|Erro no pacote"
+            client_socket.send(resposta.encode('utf-8'))
         else:
-            response = "NACK|Formato de mensagem inválido"
-            client_socket.send(response.encode('utf-8'))
+            resposta = "NACK|Formato de mensagem inválido"
+            client_socket.send(resposta.encode('utf-8'))
 
 def servidor():
 
     # Definindo o endereço do servidor
     host = '127.0.0.1'  
-    port = 8080  
+    port = 8081
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
 
@@ -69,13 +78,15 @@ def servidor():
     print("Conectado cliente no endereço:", endereco)
 
     # Realiza o handshake
-    mode, max_size = process_handshake(client_socket)
+    modo, tam_max = process_handshake(client_socket)
 
-    if mode and max_size:
-        print(f"Modo de operação: {mode}, Tamanho máximo de pacote: {max_size}")
+    if modo and tam_max:
+        print(f"Modo de operação: {modo}, Tamanho máximo de pacote: {tam_max}")
         # Inicia a troca de mensagens
         comunicacao_cliente(client_socket)
     
     # Fecha a conexão
     client_socket.close()
 
+if __name__ == '__main__':
+    servidor()

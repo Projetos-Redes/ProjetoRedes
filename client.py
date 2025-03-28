@@ -3,13 +3,25 @@ import socket
 # Realizando o handshake
 def handshake(client_socket):
 
-    # Enviando mensagem ao servidor
-    mensagem = "HANDSHAKE|modo_texto|1024"
+    # 1. Enviando mensagem ao servidor (SYN)
+    modo = "modo_texto"
+    tam_max = "1025"
+    mensagem = f"SYN|{modo}|{tam_max}"
     client_socket.send(mensagem.encode('utf-8'))
 
-    # Recebendo a resposta do servidor
+    # 2. Recebendo a resposta do servidor (SYN-ACK)
     resposta = client_socket.recv(1024).decode('utf-8')
     print("Resposta do servidor:", resposta)
+
+    print(resposta.split("|")[1])
+    print(resposta.split("|")[2])
+    # Conferindo resposta 
+    if resposta.startswith("SYN-ACK") and resposta.split("|")[1] == modo and resposta.split("|")[2] == tam_max:
+        # 3. Manda o (ACK)
+        client_socket.send("ACK".encode('utf-8'))
+        print("3° via do handshake feito!")
+    else:
+        print("Erro no handshake")
 
 # Trocar mensagens
 def comunicacao_server(client_socket, message):
@@ -27,7 +39,7 @@ def cliente():
 
     # Conectando ao servidor
     host = '127.0.0.1'  
-    port = 8080  
+    port = 8081
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((host, port))
@@ -51,3 +63,5 @@ def cliente():
     # Fecha a conexão
     client_socket.close()
 
+if __name__ == '__main__':
+    cliente()
