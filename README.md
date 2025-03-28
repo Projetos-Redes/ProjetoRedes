@@ -4,6 +4,23 @@
 
 Desenvolver uma aplicação cliente-servidor capaz de fornecer um transporte confiável de dados na camada de aplicação, considerando um canal com perdas de dados e erros.
 
+## 📅 Entregas
+
+<details>
+  <summary>07/04/2025</summary>
+  Aplicações cliente e servidor devem se conectar via socket e realizar o handshake inicial (trocando, pelo menos, modo de operação e tamanho máximo).
+</details>
+
+<details>
+  <summary>28/04/2025</summary>
+  Troca de mensagens entre cliente e servidor considerando um canal de comunicação onde erros e perdas não ocorrem.
+</details>
+
+<details>
+  <summary>19/05/2025</summary>
+  Inserção de erros e perdas simulados, bem como a implementação do correto comportamento dos processos.
+</details>
+
 ## 🔍 Descrição do Funcionamento
 
 O cliente conecta-se ao servidor e envia mensagens de texto respeitando um limite máximo de caracteres por pacote. Cada pacote de mensagem conterá no máximo 3 caracteres de carga útil.
