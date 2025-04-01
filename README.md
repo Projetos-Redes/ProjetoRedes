@@ -1,4 +1,4 @@
-# Cliente - Aplicacao Cliente-Servidor em Django
+# Projeto Redes - Aplicacao Cliente-Servidor
 
 ## 📌 Objetivo Geral
 
