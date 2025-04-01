@@ -72,11 +72,11 @@ Certifique-se de ter instalado:
 
 ### 4️⃣ Executando o Cliente e Servidor
 
-1. Execute o cliente:
+1. Execute o servidor:
    ```sh
    python3 servidor.py
    ```
-2. Envie mensagens para o servidor:
+2. Execute o cliente:
    ```sh
    python3 cliente.py
    ```
