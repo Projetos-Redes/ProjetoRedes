@@ -46,15 +46,14 @@ O cliente conecta-se ao servidor e envia mensagens de texto respeitando um limit
 Certifique-se de ter instalado:
 
 - Python 3.8+
-- Django 4.0+
 - Virtualenv (opcional, mas recomendado)
 
 ### 2️⃣ Configuração do Ambiente
 
 1. Clone o repositório:
    ```sh
-   git clone https://github.com/SUA-ORGANIZACAO/cliente-django.git
-   cd cliente-django
+   git clone https://github.com/Projetos-Redes/ProjetoRedes.git
+   cd ProjetoRedes
    ```
 2. Crie e ative um ambiente virtual (opcional, mas recomendado):
    ```sh
@@ -62,27 +61,22 @@ Certifique-se de ter instalado:
    source venv/bin/activate  # Linux/macOS
    venv\Scripts\activate  # Windows
    ```
-3. Instale as dependências:
-   ```sh
-   pip install -r requirements.txt
-   ```
 
 ### 3️⃣ Configuração do Cliente
 
 1. Configure as variáveis de ambiente no arquivo `.env`:
    ```env
-   SERVER_HOST=127.0.0.1  # Endereço do servidor
-   SERVER_PORT=8000        # Porta do servidor
-   MESSAGE_LIMIT=3         # Número máximo de caracteres por pacote
+   host=127.0.0.1  # Endereço do servidor
+   port=8000        # Porta do servidor
    ```
 
-### 4️⃣ Executando a Aplicação Cliente
+### 4️⃣ Executando o Servidor
 
 1. Execute o cliente:
    ```sh
-   python manage.py runserver
+   python3 servidor.py
    ```
 2. Envie mensagens para o servidor:
    ```sh
-   python cliente.py "Mensagem para o servidor"
+   python3 cliente.py
    ```
