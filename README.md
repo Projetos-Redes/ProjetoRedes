@@ -39,7 +39,7 @@ O cliente conecta-se ao servidor e envia mensagens de texto respeitando um limit
 - Envio de pacotes isolados ou em lote;
 - Configuração de confirmação de mensagens individualmente ou em grupo.
 
-## 🛠️ Como Rodar o Cliente em Django
+## 🛠️ Como Rodar o Projeto
 
 ### 1️⃣ Pré-requisitos
 
