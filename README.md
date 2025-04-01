@@ -70,7 +70,7 @@ Certifique-se de ter instalado:
    port=8000        # Porta do servidor
    ```
 
-### 4️⃣ Executando o Servidor
+### 4️⃣ Executando o Cliente e Servidor
 
 1. Execute o cliente:
    ```sh
