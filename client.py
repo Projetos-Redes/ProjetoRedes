@@ -13,8 +13,6 @@ def handshake(client_socket):
     resposta = client_socket.recv(1024).decode('utf-8')
     print("Resposta do servidor:", resposta)
 
-    print(resposta.split("|")[1])
-    print(resposta.split("|")[2])
     # Conferindo resposta 
     if resposta.startswith("SYN-ACK") and resposta.split("|")[1] == modo and resposta.split("|")[2] == tam_max:
         # 3. Manda o (ACK)
