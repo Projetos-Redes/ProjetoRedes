@@ -76,7 +76,7 @@ def servidor():
 
     #Recebendo entrada do usuário
     server_socket.listen(1)
-    print(f"Servidor ouvindo em {host}: {port}")
+    print(f"\n>> [SERVIDOR] Ouvindo em {host}: {port}")
 
     #Aceitando conexão com o cliente
     client_socket, endereco = server_socket.accept()
