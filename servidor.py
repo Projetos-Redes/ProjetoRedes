@@ -1,40 +1,52 @@
 import socket
 
+#Útil para estilizar o terminal
+def print_titulo(texto):
+    print("\n" + "=" * 80)
+    print(f"{texto.center(80)}")
+    print("=" * 80 + "\n")
+
+
 #Realizando representação do handshake
 def process_handshake(client_socket):
-    #Recebe o HandShake do cliente
+    print_titulo("AGUARDANDO HANDSHAKE DO CLIENTE")
+
+    #1. Recebendo o SYN do cliente
+    print(">> [SERVIDOR] Recebendo SYN do cliente...")
     resposta_syn = client_socket.recv(1024).decode('utf-8')
-    print("\nServidor recebendo SYN...")
-    print("SYN recebido: ", resposta_syn)
+    print(f">> [SERVIDOR] SYN recebido: {resposta_syn}")
 
     #Confere o Handshake e separa o modo de operação e o tamanho máximo
     parts = resposta_syn.split('|')
     if parts[0] == "SYN" and len(parts) == 3:
-        modo = parts[1]  #Tipo de operação
-        tam_max = int(parts[2])  #Tamanho máximo do pacote
+        modo = parts[1]  
+        tam_max = int(parts[2])  
 
-        #Envia SYN-ACK para o cliente
+        #2. Envia SYN-ACK para o cliente
         mensagem_syn_ack = f"SYN-ACK|{modo}|{tam_max}"
+        print(f"\n>> [SERVIDOR] Enviando SYN-ACK para o cliente: {mensagem_syn_ack}")
         client_socket.send(mensagem_syn_ack.encode('utf-8'))
-        print("Servidor enviando SYN-ACK...")
 
-        #Recebendo ACK
+        #3. Recebendo ACK
+        print("\n>> [SERVIDOR] Aguardando ACK...")
         resposta_ack = client_socket.recv(1024).decode('utf-8')
-        print("Recebendo ACK...")
+        print(">> [SERVIDOR] ACK recebido")
+
         if resposta_ack == "ACK":
-            print("Conexão estabelecida - handshake de 3 vias!\n")
+            print_titulo("HANDSHAKE DE 3 VIAS COMPLETO")
             return modo, tam_max
         else:
-            print("Erro: ACK não recebido corretamente.\n")
+            print(">> [SERVIDOR] ERRO: ACK não recebido corretamente.")
             return None, None
     else:
         client_socket.send("Erro no handshake\n".encode('utf-8'))
+        print(">> [SERVIDOR] ERRO: Formato de SYN inválido.")
         return None, None
 
 #Recebendo mesnagens cliente
 def comunicacao_cliente(client_socket):
     while True:
-        print("\nAguardando menssagem do Client...")
+        print("\nAguardando mensagem do Client...")
         #Recebe a mensagem do cliente
         data = client_socket.recv(1024).decode('utf-8')
         #Se estiver vazia, encerra a conexão
@@ -68,13 +80,13 @@ def servidor():
 
     #Aceitando conexão com o cliente
     client_socket, endereco = server_socket.accept()
-    print("Conectado cliente no endereço:", endereco)
 
     #Realiza o handshake
     modo, tam_max = process_handshake(client_socket)
+    print(f">> [SERVIDOR] Cliente de endereço: {endereco}, conectado!")
 
     if modo and tam_max:
-        print(f"Modo de operação: {modo}, Tamanho máximo de pacote: {tam_max}")
+        print(f">> [SERVIDOR] Modo de operação: {modo}, Tamanho máximo de pacote: {tam_max}")
         #Inicia a troca de mensagens
         comunicacao_cliente(client_socket)
     
