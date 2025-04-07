@@ -20,6 +20,7 @@ def process_handshake(client_socket):
     parts = resposta_syn.split('|')
     if parts[0] == "SYN" and len(parts) == 3:
         modo = parts[1]  
+        global tam_max
         tam_max = int(parts[2])  
 
         #2. Envia SYN-ACK para o cliente
@@ -29,7 +30,7 @@ def process_handshake(client_socket):
 
         #3. Recebendo ACK
         print("\n>> [SERVIDOR] Aguardando ACK...")
-        resposta_ack = client_socket.recv(1024).decode('utf-8')
+        resposta_ack = client_socket.recv(tam_max).decode('utf-8')
         print(">> [SERVIDOR] ACK recebido")
 
         if resposta_ack == "ACK":
@@ -48,7 +49,7 @@ def comunicacao_cliente(client_socket):
     while True:
         print("\nAguardando mensagem do Client...")
         #Recebe a mensagem do cliente
-        data = client_socket.recv(1024).decode('utf-8')
+        data = client_socket.recv(tam_max).decode('utf-8')
         #Se estiver vazia, encerra a conexão
         if not data:
             break
@@ -70,7 +71,7 @@ def comunicacao_cliente(client_socket):
 def servidor():
     #Definindo o endereço do servidor
     host = '127.0.0.1'  
-    port = 8081
+    port = 8080
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((host, port))
 
@@ -83,9 +84,10 @@ def servidor():
 
     #Realiza o handshake
     modo, tam_max = process_handshake(client_socket)
-    print(f">> [SERVIDOR] Cliente de endereço: {endereco}, conectado!")
 
     if modo and tam_max:
+        print(f">> [SERVIDOR] Cliente de endereço: {endereco}, conectado!")
+
         print(f">> [SERVIDOR] Modo de operação: {modo}, Tamanho máximo de pacote: {tam_max}")
         #Inicia a troca de mensagens
         comunicacao_cliente(client_socket)

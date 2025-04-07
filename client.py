@@ -24,9 +24,19 @@ def handshake(client_socket):
         else:
             print("Opção inexistente! Tente novamente\n")
 
+    # Solicitando ao usuário o tamanho máximo da mensagem
+    global tam_max
+
+    while (1):
+        tam_input = input(">> [CLIENTE] Digite o tamanho máximo da mensagem: ")
+        if tam_input.isdigit() and int(tam_input) > 0:
+            tam_max = int(tam_input)
+            break
+        else:
+            print(">> [CLIENTE] Valor inválido! Digite um número inteiro positivo.\n")
+
     #1. Enviando SYN ao servidor
-    tam_max = "1024"
-    print(f"\n>> [CLIENTE] Tamanho pré-definido de mensagem: {tam_max}")
+    print(f"\n>> [CLIENTE] Tamanho definido: {tam_max}")
 
     mensagem = f"SYN|{modo}|{tam_max}"
     print(f"\n>> [CLIENTE] Enviando SYN para o servidor: {mensagem}")
@@ -35,11 +45,11 @@ def handshake(client_socket):
 
     #2. Recebendo o SYN-ACK do Servidor
     print("\n>> [CLIENTE] Aguardando resposta SYN-ACK do servidor...")
-    resposta = client_socket.recv(1024).decode('utf-8')
+    resposta = client_socket.recv(tam_max).decode('utf-8')
     print(f">> [CLIENTE] Resposta recebida: {resposta}")
 
     #Conferindo resposta
-    if resposta.startswith("SYN-ACK") and resposta.split("|")[1] == modo and resposta.split("|")[2] == tam_max:
+    if resposta.startswith("SYN-ACK") and resposta.split("|")[1] == modo and int(resposta.split("|")[2]) == tam_max:
         #3. Enviando ACK ao servidor
         print("\n>> [CLIENTE] Enviando ACK para o servidor...")
         client_socket.send("ACK".encode('utf-8'))
@@ -55,14 +65,14 @@ def comunicacao_server(client_socket, message):
     client_socket.send(msg.encode('utf-8'))
 
     #Recebendo resposta do servidor
-    resposta = client_socket.recv(1024).decode('utf-8')
+    resposta = client_socket.recv(tam_max).decode('utf-8')
     print("Resposta do servidor:", resposta)
 
 
 def cliente():
     #Conectando com servidor
     host = '127.0.0.1'  
-    port = 8081
+    port = 8080
 
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
