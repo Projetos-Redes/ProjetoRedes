@@ -45,7 +45,7 @@ def handshake(client_socket):
 
     #2. Recebendo o SYN-ACK do Servidor
     print("\n>> [CLIENTE] Aguardando resposta SYN-ACK do servidor...")
-    resposta = client_socket.recv(tam_max).decode('utf-8')
+    resposta = client_socket.recv(1024).decode('utf-8')
     print(f">> [CLIENTE] Resposta recebida: {resposta}")
 
     #Conferindo resposta
@@ -60,13 +60,20 @@ def handshake(client_socket):
 
 #Troca de mensagens com o Servidor
 def comunicacao_server(client_socket, message):
-    #Enviando mensagem ao servidor
-    msg = f"MSG|{message}"
-    client_socket.send(msg.encode('utf-8'))
+    partes = [message[i:i+tam_max] for i in range(0, len(message), tam_max)]
+    
+    for idx, parte in enumerate(partes, start=1):
+        pacote = f"{idx}|{parte}"
+        print(f">> [CLIENTE] Enviando pacote {idx}: {parte}")
+        client_socket.send(pacote.encode('utf-8'))
 
-    #Recebendo resposta do servidor
-    resposta = client_socket.recv(tam_max).decode('utf-8')
-    print("Resposta do servidor:", resposta)
+        # Espera o ACK
+        ack = client_socket.recv(tam_max).decode('utf-8')
+        print(f">> [CLIENTE] ACK recebido: {ack}")
+
+        if ack != f"ACK|{idx}":
+            print(f">> [CLIENTE] Erro: ACK inesperado ({ack}), reenvio do pacote {idx}")
+            client_socket.send(pacote.encode('utf-8'))
 
 
 def cliente():
@@ -88,16 +95,16 @@ def cliente():
 
         #Troca de mensagem com o Servidor
         while True:
+    
             #Recebendo mensagem do cliente
             message = input("\nDigite sua mensagem (ou 'sair' para encerrar): ")
-
-            #Enviando mensagem para o servidor
-            comunicacao_server(client_socket, message)
-
-            #Se o usuário digitar 'sair', o loop é interrompido
+            
             if message.lower() == 'sair':
                 print("Desconectando do servidor...")
                 break
+
+            #Enviando mensagem para o servidor
+            comunicacao_server(client_socket, message)
 
     #Fecha a conexão
     client_socket.close()

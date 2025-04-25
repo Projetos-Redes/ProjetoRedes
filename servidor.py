@@ -46,27 +46,27 @@ def process_handshake(client_socket):
 
 #Recebendo mesnagens cliente
 def comunicacao_cliente(client_socket):
+    mensagem_final = ""
     while True:
-        print("\nAguardando mensagem do Client...")
-        #Recebe a mensagem do cliente
-        data = client_socket.recv(tam_max).decode('utf-8')
-        #Se estiver vazia, encerra a conexão
+        data = client_socket.recv(tam_max + 10).decode('utf-8')
         if not data:
             break
-        print("Mensagem recebida:", data)
 
-        #Verifica o tipo da mensagem e responde
-        parts = data.split('|')
-        if parts[0] == "MSG":
-            resposta = "RESPONSE|Mensagem recebida com sucesso!"
-            client_socket.send(resposta.encode('utf-8'))
-        elif parts[0] == "NACK":
-            resposta = "NACK|Erro no pacote"
-            client_socket.send(resposta.encode('utf-8'))
-        else:
-            resposta = "NACK|Formato de mensagem inválido"
-            client_socket.send(resposta.encode('utf-8'))
-    print("Cliente desconectado!")
+        if data == "END":
+            print(">> [SERVIDOR] Fim da transmissão")
+            break
+
+        id_pacote, conteudo = data.split("|", 1)
+        print(f">> [SERVIDOR] Pacote {id_pacote} recebido: {conteudo}")
+
+        # Junta a mensagem
+        mensagem_final += conteudo
+
+        # Envia ACK correspondente
+        ack = f"ACK|{id_pacote}"
+        client_socket.send(ack.encode('utf-8'))
+
+    print("\n>> [SERVIDOR] Mensagem reconstruída:", mensagem_final)
 
 def servidor():
     #Definindo o endereço do servidor
