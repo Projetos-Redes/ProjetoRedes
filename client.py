@@ -33,6 +33,24 @@ def handshake(client_socket):
         else:
             print(">> [CLIENTE] Valor inválido! Digite um número inteiro positivo.\n")
 
+    while True:
+        selecao = input("\n>> [CLIENTE] Escolha se quer simular erros:\n(1) Sim\n(2) Não\nDigite sua escolha: ")
+        if selecao == "1":
+            erroEscolha = input("\tSelecione o Erro a ser simulado\n\t(1) Timeout Erro\n\t(2) Pacote Duplicado\n\tdigite sua escolha: ")
+            if erroEscolha == "1":
+                print("\tErro de TimeOut escolhido")
+                break
+            elif erroEscolha == "2":
+                print("\tErro de Duplicação de Pacotes escolhido")
+                break
+            else:
+                print("\tOpição inválida! Tente novamente")
+        elif selecao == "2":
+            erroEscolha = None
+            break
+        else:
+            print("Opição inválida! Tente Novamente")
+
     mensagem = f"SYN|{modo}|{tam_max}"
     print(f"\n>> [CLIENTE] Enviando SYN para o servidor: {mensagem}")
     client_socket.send(mensagem.encode('utf-8'))
@@ -48,7 +66,7 @@ def handshake(client_socket):
     else:
         print_titulo("ERRO NO HANDSHAKE")
 
-    return modo, tam_max
+    return modo, tam_max, erroEscolha
 
 # Recebendo mensagens 
 def receber_mensagem_completa(socket_conexao):
@@ -61,7 +79,7 @@ def receber_mensagem_completa(socket_conexao):
     return mensagem_completa.split(b'\n')[0]
 
 # Troca de mensagens - GoBackN
-def comunicacao_server(client_socket, mensagem, tam_max):
+def comunicacao_server(client_socket, mensagem, tam_max, erroSelecao):
     print_titulo("INICIANDO COMUNICAÇÃO GO-BACK-N")
 
     segmentos = {}
@@ -101,10 +119,22 @@ def comunicacao_server(client_socket, mensagem, tam_max):
 
                 # Envia o segmento
                 try:
+                    if erroSelecao == "1" and num_seq == 2:
+                        print(f"Iniciando simulação do Erro TimeOut no segmento {num_seq}")
+                        janela_envio[num_seq] = (segmento, time.time())
+                        prox_segmento += 1
+                        continue
+
                     client_socket.send(mensagem_enviar)
                     janela_envio[num_seq] = (segmento, time.time())
                     print(f">> [CLIENTE] Enviando segmento {num_seq}: '{segmento}'")
                     prox_segmento += 1
+
+                    if erroSelecao == "2" and num_seq == 3:
+                        print(f"Iniciando simulação do Erro de Pacote Duplicado no segmento {num_seq}")
+                        client_socket.send(mensagem_enviar)
+                        print(f"\n{mensagem_enviar} reenviado com sucesso \n")
+
                 except socket.error as e:
                     print(f">> [CLIENTE] Erro ao enviar segmento {num_seq}: {e}")
                     break
@@ -163,7 +193,7 @@ def comunicacao_server(client_socket, mensagem, tam_max):
     print_titulo("TRANSMISSÃO GO-BACK-N CONCLUÍDA PELO CLIENTE")
 
 # Troca de mensagens - stop and wait
-def comunicacao_servidor_stop_and_wait(client_socket, mensagem, tam_max):
+def comunicacao_servidor_stop_and_wait(client_socket, mensagem, tam_max, erroSelecao):
     print_titulo("INICIANDO TRANSMISSÃO STOP-AND-WAIT")
 
     num_sequencia = 1 
@@ -208,7 +238,7 @@ def comunicacao_servidor_stop_and_wait(client_socket, mensagem, tam_max):
     print_titulo("TRANSMISSÃO STOP-AND-WAIT CONCLUÍDA PELO CLIENTE")
 
 # Começar a comunicação com o servidor
-def iniciar_comunicacao(client_socket, tam_max, modo):
+def iniciar_comunicacao(client_socket, tam_max, modo, erroSelecao):
 
     message = input("\nDigite sua mensagem (ou 'sair' para encerrar): ")
     if message.lower() == 'sair':
@@ -216,9 +246,9 @@ def iniciar_comunicacao(client_socket, tam_max, modo):
         return
 
     if modo.upper() == "GOBACKN":
-        comunicacao_server(client_socket, message, tam_max)
+        comunicacao_server(client_socket, message, tam_max, erroSelecao)
     elif modo.upper() == "STOP-AND-WAIT":
-        comunicacao_servidor_stop_and_wait(client_socket, message, tam_max)
+        comunicacao_servidor_stop_and_wait(client_socket, message, tam_max, erroSelecao)
     else:
         print("Modo de operação não reconhecido.")
 
@@ -236,11 +266,10 @@ def cliente():
         return
 
     else:
-        modo, tam_max = handshake(client_socket)
+        modo, tam_max, erroSelecao = handshake(client_socket)
 
         if modo and tam_max:
-            
-            iniciar_comunicacao(client_socket, tam_max, modo)
+            iniciar_comunicacao(client_socket, tam_max, modo, erroSelecao)
                 
 
 
