@@ -57,9 +57,9 @@ Certifique-se de ter instalado:
    ```
 2. Crie e ative um ambiente virtual (opcional, mas recomendado):
    ```sh
-   python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   venv\Scripts\activate  # Windows
+   python -m venv env
+   source env/bin/activate  # Linux/macOS
+   env\Scripts\activate  # Windows
    ```
 
 ### 3️⃣ Configuração do Cliente
@@ -74,9 +74,12 @@ Certifique-se de ter instalado:
 
 1. Execute o servidor:
    ```sh
-   python3 servidor.py
+   python3 servidor.py # linux/macOS
+   python servidor.py # Windows
    ```
 2. Execute o cliente:
    ```sh
-   python3 cliente.py
+   python3 client.py # linux/macOS
+   python client.py # Windows
    ```
+   

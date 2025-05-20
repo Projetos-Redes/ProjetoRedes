@@ -135,7 +135,7 @@ def comunicacao_server(client_socket, mensagem, tam_max, erro_simulado):
                     if erro_simulado == "2" and num_seq == segmento_erro_duplicado:
                         print(f"Iniciando simulação do Erro de Pacote Duplicado no segmento {num_seq}")
                         client_socket.send(mensagem_enviar)
-                        print(f"\n{mensagem_enviar} reenviado com sucesso \n")
+                        print(f"\n{mensagem_enviar.decode()} reenviado com sucesso \n")
 
                 except socket.error as e:
                     print(f">> [CLIENTE] Erro ao enviar segmento {num_seq}: {e}")
@@ -195,7 +195,6 @@ def comunicacao_servidor_stop_and_wait(client_socket, mensagem, tam_max, erro_si
     num_sequencia = 1 
     total_segmentos = (len(mensagem) + tam_max) // tam_max
     segmento_erro = random.randint(1, total_segmentos) if erro_simulado in ["1","2"] else None
-
     while mensagem:
         dados_segmento = mensagem[0:tam_max]  
         mensagem = mensagem[tam_max:]  
@@ -232,7 +231,7 @@ def comunicacao_servidor_stop_and_wait(client_socket, mensagem, tam_max, erro_si
                 else:
                     print(f">> [CLIENTE] ACK incorreto. Reenviando segmento {num_sequencia}")
             except socket.timeout:
-                print(f">> [CLIENTE] Timeout! Reenviando segmento {num_sequencia}")
+                print(f">> [CLIENTE] Timeout! Em segmento {num_sequencia}")
             except socket.error as e:
                 print(f">> [CLIENTE] Erro de socket: {e}")
                 return
@@ -248,18 +247,18 @@ def comunicacao_servidor_stop_and_wait(client_socket, mensagem, tam_max, erro_si
 
 # Começar a comunicação com o servidor
 def iniciar_comunicacao(client_socket, tam_max, modo, erro_simulado):
-    while True:
-        message = input("\nDigite sua mensagem (ou 'sair' para encerrar): ")
-        if message.lower() == 'sair':
-            print("Desconectando do servidor...")
-            return
+    
+    message = input("\nDigite sua mensagem (ou 'sair' para encerrar): ")
+    if message.lower() == 'sair':
+        print("Desconectando do servidor...")
+        
 
-        if modo.upper() == "GOBACKN":
-            comunicacao_server(client_socket, message, tam_max, erro_simulado)
-        elif modo.upper() == "STOP-AND-WAIT":
-            comunicacao_servidor_stop_and_wait(client_socket, message, tam_max, erro_simulado)
-        else:
-            print("Modo de operação não reconhecido.")
+    if modo.upper() == "GOBACKN":
+        comunicacao_server(client_socket, message, tam_max, erro_simulado)
+    elif modo.upper() == "STOP-AND-WAIT":
+        comunicacao_servidor_stop_and_wait(client_socket, message, tam_max, erro_simulado)
+    else:
+        print("Modo de operação não reconhecido.")
 
 
 def cliente():
