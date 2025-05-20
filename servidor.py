@@ -107,6 +107,7 @@ def comunicacao_cliente_stop_and_wait(client_socket):
     print_titulo("TRANSMISSÃO STOP-AND-WAIT CONCLUÍDA PELO SERVIDOR")
     print(f">> [SERVIDOR] Mensagem completa recebida: {mensagem_final}\n")
 
+
 # Recebendo mensagens do cliente - GoBackN
 def comunicacao_cliente(client_socket):
     print_titulo("INICIANDO RECEPÇÃO GO-BACK-N")
@@ -132,6 +133,21 @@ def comunicacao_cliente(client_socket):
                     dados = parts[1]
                     print(f"\n>> [SERVIDOR] Recebeu segmento {num_sequencia}: '{dados}'")
 
+                    # Se o segmento recebido estiver fora de ordem
+                    if num_sequencia > proximo_esperado:
+                        print(f">> [SERVIDOR] Segmento {num_sequencia} recebido fora de ordem. Esperando {proximo_esperado}.")
+                        buffer[num_sequencia] = dados
+                        ack_reenviar = f"{proximo_esperado - 1}\n"
+                        client_socket.send(ack_reenviar.encode())
+                        print(f">> [SERVIDOR] Reenviou ACK {proximo_esperado - 1} para cliente.")
+
+                    if num_sequencia < proximo_esperado:
+                        print(f">> [SERVIDOR] Segmento {num_sequencia} já recebido (reenvio?).")
+                        ack_reenviar = f"{num_sequencia}\n"
+                        client_socket.send(ack_reenviar.encode())
+                        print(f">> [SERVIDOR] Reenviou ACK {num_sequencia} para cliente.")
+
+
                     # Se for o segmento esperado
                     if num_sequencia == proximo_esperado:
                         print(f">> [SERVIDOR] Segmento {num_sequencia} recebido na ordem correta.")
@@ -146,19 +162,8 @@ def comunicacao_cliente(client_socket):
                             proximo_esperado += 1
                         print(f">> [SERVIDOR] Próximo esperado: {proximo_esperado}")
 
-                    # Se o segmento recebido estiver fora de ordem
-                    elif num_sequencia > proximo_esperado:
-                        print(f">> [SERVIDOR] Segmento {num_sequencia} recebido fora de ordem. Esperando {proximo_esperado}.")
-                        buffer[num_sequencia] = dados
-                        ack_reenviar = f"{proximo_esperado - 1}\n"
-                        client_socket.send(ack_reenviar.encode())
-                        print(f">> [SERVIDOR] Reenviou ACK {proximo_esperado - 1} para cliente.")
-
-                    elif num_sequencia < proximo_esperado:
-                        print(f">> [SERVIDOR] Segmento {num_sequencia} já recebido (reenvio?).")
-                        ack_reenviar = f"{num_sequencia}\n"
-                        client_socket.send(ack_reenviar.encode())
-                        print(f">> [SERVIDOR] Reenviou ACK {num_sequencia} para cliente.")
+                    
+                    
 
                 except ValueError:
                     print(f">> [SERVIDOR] Erro ao converter número de sequência: {parts[0]}")
